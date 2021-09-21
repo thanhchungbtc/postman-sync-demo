@@ -1,0 +1,571 @@
+{
+  "info": {
+    "_postman_id": "f0cdf6b5-f883-444c-807e-54250b27bb54",
+    "name": "ok_subjects_crud",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "login (teacher)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"レスポンスコード\", () => {",
+              "    pm.expect(pm.response.code).equals(200);",
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "",
+              "pm.environment.set(\"token\", jsonData.token);",
+              ""
+            ],
+            "type": "text/javascript",
+            "id": "9fca365c-e90a-4908-93b8-ed895802f57e"
+          }
+        }
+      ],
+      "_postman_id": "f16fb50e-68f1-4d7a-9c41-96e99535d078",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"email\": \"teacher1@test01.jp\",\n\t\"password\": \"password\",\n\t\"schoolCode\": \"TEST001\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{apiBaseUrl}}/auth/login"
+      },
+      "response": []
+    },
+    {
+      "name": "list subjects",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"レスポンスコード\", () => {",
+              "    pm.expect(pm.response.code).equals(200);",
+              "});",
+              "",
+              "const jsonObj = pm.response.json();",
+              "",
+              "pm.test(\"データがあること\", () => {",
+              "    pm.expect(jsonObj.length).to.be.least(1);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "id": "d3af76c8-37d8-4c05-8618-df1570f44c33"
+          }
+        }
+      ],
+      "_postman_id": "865d7937-4a33-43ba-afbb-ef043a762373",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{apiBaseUrl}}/subjects"
+      },
+      "response": []
+    },
+    {
+      "name": "list subjects by category",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"レスポンスコード\", () => {",
+              "    pm.expect(pm.response.code).equals(200);",
+              "});",
+              "",
+              "const jsonObj = pm.response.json();",
+              "",
+              "pm.test(\"データがあること\", () => {",
+              "    pm.expect(jsonObj.subjects.length).to.be.least(1);",
+              "});",
+              "",
+              "// データが多すぎて機能していないのでピンポイントで確認",
+              "let existsSubject3, existsSubject5, existsSubject11, existsSubject25 = false",
+              "for (const subject of jsonObj.subjects) {",
+              "    if (subject.id == 3) {",
+              "        existsSubject3 = true",
+              "    } else if (subject.id == 5) {",
+              "        existsSubject5 = true",
+              "    } else if (subject.id == 11) {",
+              "        existsSubject11 = true",
+              "    } else if (subject.id == 25) {",
+              "        existsSubject25 = true",
+              "    }",
+              "}",
+              "",
+              "// // {subject_id:5, cateIds:[2, 18, 4, 6]}",
+              "pm.test(\"categoryId:1 が設定されていないかつ、子階層 categoryId: 2 が設定されているデータがあること\", () => {",
+              "    pm.expect(existsSubject5).to.be.true;",
+              "});",
+              "",
+              "// // {subject_id:5, cateIds:[11]}",
+              "pm.test(\"categoryId:1 が設定されていないかつ、子階層 categoryId: 3 が設定されているデータがあること\", () => {",
+              "    pm.expect(existsSubject11).to.be.true;",
+              "});",
+              "",
+              "// // {subject_id:3, cateIds:[10, 4]}",
+              "pm.test(\"categoryId:1 が設定されていないかつ、孫階層 categoryId: 4 が設定されているデータがあること\", () => {",
+              "    pm.expect(existsSubject3).to.be.true;",
+              "});",
+              "",
+              "// // {subject_id:25, cateIds:[11, 5]}",
+              "pm.test(\"categoryId:1 が設定されていないかつ、孫階層 categoryId: 5 が設定されているデータがあること\", () => {",
+              "    pm.expect(existsSubject25).to.be.true;",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "id": "33bdfe9d-ab46-4d42-b02b-0eaee9aff28d"
+          }
+        }
+      ],
+      "_postman_id": "64622e90-e93f-4fa5-8b28-14006daf45ab",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{apiBaseUrl}}/categories/1/subjects"
+      },
+      "response": []
+    },
+    {
+      "name": "list subjects by category subtree",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"レスポンスコード\", () => {",
+              "    pm.expect(pm.response.code).equals(200);",
+              "});",
+              "",
+              "const jsonObj = pm.response.json();",
+              "",
+              "pm.test(\"データがあること\", () => {",
+              "    pm.expect(jsonObj.subjects.length).to.be.least(1);",
+              "});",
+              "",
+              "// データが多すぎて機能していないのでピンポイントで確認",
+              "let existsSubject3, existsSubject6, existsSubject27, existsSubject25 = false",
+              "for (const subject of jsonObj.subjects) {",
+              "    if (subject.id == 3) {",
+              "        existsSubject3 = true",
+              "    } else if (subject.id == 6) {",
+              "        existsSubject6 = true",
+              "    } else if (subject.id == 27) {",
+              "        existsSubject27 = true",
+              "    } else if (subject.id == 25) {",
+              "        existsSubject25 = true",
+              "    }",
+              "}",
+              "",
+              "// // {subject_id:27, cateIds:[1, 10, 13, 7]}",
+              "pm.test(\"categoryId:3 が設定されていないかつ、親階層 categoryId: 1 が設定されているデータがないこと\", () => {",
+              "    pm.expect(existsSubject27).to.not.be.true;",
+              "});",
+              "",
+              "// // {subject_id:6, cateIds:[2, 18]}",
+              "pm.test(\"categoryId:3 が設定されていないかつ、同階層 categoryId: 2 が設定されているデータがないこと\", () => {",
+              "    pm.expect(existsSubject6).to.not.be.true;",
+              "});",
+              "",
+              "",
+              "// // {subject_id:3, cateIds:[10, 4]}",
+              "pm.test(\"categoryId:3 が設定されていないかつ、子階層 categoryId: 4 が設定されているデータがあること\", () => {",
+              "    pm.expect(existsSubject3).to.be.true;",
+              "});",
+              "",
+              "// // {subject_id:25, cateIds:[11, 5]}",
+              "pm.test(\"categoryId:3 が設定されていないかつ、子階層 categoryId: 5 が設定されているデータがあること\", () => {",
+              "    pm.expect(existsSubject25).to.be.true;",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "id": "5e6e9ebc-ccd1-44de-a041-b9b9e8fd3ba5"
+          }
+        }
+      ],
+      "_postman_id": "88c287b1-43e5-4e13-ab9f-75f5d6b2b0d3",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{apiBaseUrl}}/categories/3/subjects"
+      },
+      "response": []
+    },
+    {
+      "name": "list subjects by category same tree",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"レスポンスコード\", () => {",
+              "    pm.expect(pm.response.code).equals(200);",
+              "});",
+              "",
+              "const jsonObj = pm.response.json();",
+              "",
+              "pm.test(\"データがあること\", () => {",
+              "    pm.expect(jsonObj.subjects.length).to.be.least(1);",
+              "});",
+              "",
+              "// データが多すぎて機能していないのでピンポイントで確認",
+              "let existsSubject3, existsSubject25 = false",
+              "for (const subject of jsonObj.subjects) {",
+              "    if (subject.id == 3) {",
+              "        existsSubject3 = true",
+              "    } else if (subject.id == 25) {",
+              "        existsSubject25 = true",
+              "    }",
+              "}",
+              "",
+              "// // {subject_id:3, cateIds:[10, 4]}",
+              "pm.test(\"categoryId:2 が設定されていないかつ、同階層 categoryId: 3の子階層 categoryId: 4 が設定されているデータがないこと\", () => {",
+              "    pm.expect(existsSubject3).to.not.be.true;",
+              "});",
+              "",
+              "// // {subject_id:25, cateIds:[11, 5]}",
+              "pm.test(\"categoryId:3 が設定されていないかつ、同階層 categoryId: 3の子階層 categoryId: 5 が設定されているデータがないこと\", () => {",
+              "    pm.expect(existsSubject25).to.not.be.true;",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "id": "1f22e401-a20d-4521-9e3c-084765c99aa7"
+          }
+        }
+      ],
+      "_postman_id": "206e5aec-8d36-4922-bf8f-6ece27ab2027",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{apiBaseUrl}}/categories/2/subjects"
+      },
+      "response": []
+    },
+    {
+      "name": "create subject",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"レスポンスコード\", () => {",
+              "    pm.expect(pm.response.code).equals(201);",
+              "});",
+              "",
+              "const jsonObj = pm.response.json();",
+              "",
+              "pm.test(\"暗号化したIDが存在すること\", () => {",
+              "    pm.expect(jsonObj.subject.encryptId).is",
+              "});",
+              "",
+              "pm.environment.set(\"createdSubjectId\", jsonObj.subject.id);",
+              "pm.environment.set(\"createdSubjectCode\", jsonObj.subject.code);",
+              "pm.environment.set(\"createdSubjectEncryptId\", jsonObj.subject.encryptId);",
+              "pm.environment.set(\"createdSubjectClassCode\", jsonObj.subject.classCode);",
+              ""
+            ],
+            "type": "text/javascript",
+            "id": "0c12ee3b-a0c1-4920-bffa-835c876958d6"
+          }
+        }
+      ],
+      "_postman_id": "0109eda0-9366-4889-8f6d-9772fa7e2fff",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"targetGrade\": [\n        4,\n        1\n    ],\n    \"timeTables\": [\n        {\n            \"endTime\": \"10:30:00\",\n            \"startTime\": \"09:00:00\",\n            \"weekday\": 1\n        },\n        {\n            \"endTime\": \"10:30:00\",\n            \"startTime\": \"09:00:00\",\n            \"weekday\": 2\n        }\n    ],\n    \"draft\": false,\n    \"categoryIds\": [\n        1,\n        2\n    ],\n    \"weekdays\": [\n        {\n            \"value\": 1,\n            \"times\": [\n                1\n            ]\n        }\n    ],\n    \"release\": 1,\n    \"name\": \"TEST_SUBJECT_{% uuid 'v4' %}\",\n    \"teacherIds\": [\n        1\n    ],\n    \"content\": \"TEST\",\n    \"status\": 0,\n    \"code\": \"{{$randomUUID}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{apiBaseUrl}}/subjects"
+      },
+      "response": []
+    },
+    {
+      "name": "get created subject",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"レスポンスコード\", () => {",
+              "    pm.expect(pm.response.code).equals(200);",
+              "});",
+              "",
+              "const jsonObj = pm.response.json();",
+              "",
+              "id = pm.environment.get(\"createdSubjectId\")",
+              "pm.test(\"作成したIDが正しいこと\", () => {",
+              "    pm.expect(jsonObj.id).equals(id);",
+              "});",
+              "",
+              "",
+              "pm.test(\"時間割はセットされること（２件で登録する）\", () => {",
+              "    pm.expect(jsonObj.timetables.length).to.be.equal(2);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "id": "90d06eb4-b385-48d0-8e13-e8abb45103ef"
+          }
+        }
+      ],
+      "_postman_id": "aaa8f567-8b11-4498-a2c4-8bda087ccf4b",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{apiBaseUrl}}/subjects/{{createdSubjectEncryptId}}"
+      },
+      "response": []
+    },
+    {
+      "name": "get created subject by class  code",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"レスポンスコード\", () => {",
+              "    pm.expect(pm.response.code).equals(200);",
+              "});",
+              "",
+              "const jsonObj = pm.response.json();",
+              "classCode = pm.environment.get(\"createdSubjectClassCode\")",
+              "",
+              "pm.test(\"class code が正しいこと\", () => {",
+              "    pm.expect(jsonObj.classCode).equals(classCode);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "id": "54123f27-c6eb-4aa4-9deb-c8d84f766045"
+          }
+        }
+      ],
+      "_postman_id": "7ed7f17f-3990-46c8-8ebb-2ca97cec76af",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{apiBaseUrl}}/subjects/class-code/{{createdSubjectClassCode}}"
+      },
+      "response": []
+    },
+    {
+      "name": "update subject",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"レスポンスコード\", () => {",
+              "    pm.expect(pm.response.code).equals(200);",
+              "});",
+              "",
+              "const jsonObj = pm.response.json();",
+              "",
+              "pm.test(\"レスポンス形式が正しいこと\", () => {",
+              "    pm.expect(jsonObj).to.have.property('subject');",
+              "});",
+              "",
+              "id = pm.environment.get(\"createdSubjectId\")",
+              "createdSubjectEncryptId = pm.environment.get(\"createdSubjectEncryptId\")",
+              "",
+              "pm.test(\"更新したIDが正しいこと\", () => {",
+              "    pm.expect(jsonObj.subject.id).equals(id);",
+              "    pm.expect(jsonObj.subject.encryptId).equals(createdSubjectEncryptId);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "id": "16b41e75-dd9a-4626-a60a-a9582aed7a75"
+          }
+        }
+      ],
+      "_postman_id": "67e556a6-2995-42e2-83bd-b8f15613139f",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"targetGrade\": [\n        4,\n        1\n    ],\n    \"timeTables\": [\n        {\n            \"endTime\": \"10:30:00\",\n            \"startTime\": \"09:00:00\",\n            \"weekday\": 1\n        }\n\n    ],\n    \"draft\": false,\n    \"categoryIds\": [\n        1,\n        2\n    ],\n    \"teacherIds\": [\n        1\n    ],\n    \"release\": 1,\n    \"name\": \"TEST01 edited\",\n    \"content\": \"SUMMARY edited\",\n    \"status\": 0,\n    \"code\": \"{{createdSubjectCode}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{apiBaseUrl}}/subjects/{{createdSubjectEncryptId}}"
+      },
+      "response": []
+    },
+    {
+      "name": "get updated subject",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"レスポンスコード\", () => {",
+              "    pm.expect(pm.response.code).equals(200);",
+              "});",
+              "",
+              "const jsonObj = pm.response.json();",
+              "",
+              "pm.test(\"時間割は更新されること（１件になる）\", () => {",
+              "    pm.expect(jsonObj.timetables.length).to.be.equal(1);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "id": "777f92b9-262b-4a65-8142-9ff9ea5b2d5c"
+          }
+        }
+      ],
+      "_postman_id": "7ed5bc38-894b-4837-aa98-3a6629ede480",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{apiBaseUrl}}/subjects/{{createdSubjectEncryptId}}"
+      },
+      "response": []
+    },
+    {
+      "name": "delete subject",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"レスポンスコード\", () => {",
+              "    pm.expect(pm.response.code).equals(200);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "id": "c9b77c23-87fc-4e2b-b083-cafaf84b8b69"
+          }
+        }
+      ],
+      "_postman_id": "8b6b7a6f-4c8a-46e2-ab13-9fdf88cfa222",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{apiBaseUrl}}/subjects/{{createdSubjectEncryptId}}"
+      },
+      "response": []
+    }
+  ]
+}
